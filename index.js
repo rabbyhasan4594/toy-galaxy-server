@@ -45,20 +45,33 @@ async function run() {
             res.send(result);
         })
 
+
+
         app.get("/allToys/:text", async (req, res) => {
             console.log(req.params.text);
-            if (req.params.text == "sportsCar" || 
-            req.params.text == "policeCar"
-           || req.params.text == "truck"
+            if (req.params.text == "sportsCar" ||
+                req.params.text == "policeCar"
+                || req.params.text == "truck"
             ) {
-                const result = await serviceCollection.find({ category: req.params.text}).toArray();
+                const result = await serviceCollection.find({ category: req.params.text }).toArray();
                 return res.send(result);
             }
 
-                const result = await serviceCollection.find({}).toArray();
-                res.send(result);
-            
+            const result = await serviceCollection.find({}).toArray();
+            res.send(result);
+
         })
+
+        
+
+        app.get("/myToys/:email", async (req, res) => {
+            const toys = await serviceCollection
+              .find({
+                sellerEmail: req.params.email,
+              })
+              .toArray();
+            res.send(toys);
+          });
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
