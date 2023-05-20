@@ -73,6 +73,17 @@ async function run() {
             res.send(toys);
         });
 
+        app.get("/myToys/sort/:email", async (req, res) => {
+            const toys = await serviceCollection
+                .find({
+                    sellerEmail: req.params.email,
+                })
+                .sort({ price: 1 })
+                .toArray();
+            res.send(toys);
+        });
+
+        
         app.put("/updateToy/:id", async (req, res) => {
             const id = req.params.id;
             const body = req.body;
@@ -88,6 +99,15 @@ async function run() {
             const result = await serviceCollection.updateOne(filter, updateDoc);
             res.send(result);
         });
+
+
+        app.delete('/myToys/:id', async (req, res) => {
+            console.log(req.params.id)
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await serviceCollection.deleteOne(query);
+            res.send(result);
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
