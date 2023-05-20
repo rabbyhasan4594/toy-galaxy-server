@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express();
 const port = process.env.PORT || 5000;
@@ -62,16 +62,32 @@ async function run() {
 
         })
 
-        
+
 
         app.get("/myToys/:email", async (req, res) => {
             const toys = await serviceCollection
-              .find({
-                sellerEmail: req.params.email,
-              })
-              .toArray();
+                .find({
+                    sellerEmail: req.params.email,
+                })
+                .toArray();
             res.send(toys);
-          });
+        });
+
+        app.put("/updateToy/:id", async (req, res) => {
+            const id = req.params.id;
+            const body = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+
+                    price: body.price,
+                    quantity: body.quantity,
+                    description: body.description,
+                },
+            };
+            const result = await serviceCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        });
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
@@ -88,7 +104,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Toy Galaxy server')
+    res.send('Toy Galaxy server running')
 })
 
 app.listen(port, () => {
