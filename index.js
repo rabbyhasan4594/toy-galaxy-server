@@ -34,6 +34,11 @@ async function run() {
 
         const serviceCollection = client.db('toyGalaxy').collection('services')
 
+
+        const indexKeys = { toyName: 1 }; // Replace field1 and field2 with your actual field names
+    const indexOptions = { name: "toyName" };
+    const result = await serviceCollection.createIndex(indexKeys, indexOptions);
+
         app.post("/addAToy", async (req, res) => {
             const body = req.body;
             const result = await serviceCollection.insertOne(body);
@@ -48,11 +53,8 @@ async function run() {
 
 
         app.get("/allToys/:text", async (req, res) => {
-            console.log(req.params.text);
-            if (req.params.text == "sportsCar" ||
-                req.params.text == "policeCar"
-                || req.params.text == "truck"
-            ) {
+
+            if (req.params.text == "sportsCar" || req.params.text == "policeCar" || req.params.text == "truck"  ) {
                 const result = await serviceCollection.find({ category: req.params.text }).toArray();
                 return res.send(result);
             }
@@ -62,7 +64,18 @@ async function run() {
 
         })
 
+         
 
+        app.get("/getToysByText/:text", async (req, res) => {
+            const text = req.params.text;
+            const result = await serviceCollection
+              .find({
+                
+                   toyName: { $regex: text, $options: "i" } ,
+              })
+              .toArray();
+            res.send(result);
+          });
 
         app.get("/myToys/:email", async (req, res) => {
             const toys = await serviceCollection
@@ -84,11 +97,16 @@ async function run() {
         });
 
         app.get("/viewDetails/:id", async (req, res) => {
-            console.log(req.params.id);
             const viewDetails = await serviceCollection.findOne({
               _id: new ObjectId(req.params.id),
             });
             res.send(viewDetails);
+          });
+          app.get("/update/:id", async (req, res) => {
+            const result = await serviceCollection.findOne({
+              _id: new ObjectId(req.params.id),
+            });
+            res.send(result);
           });
 
         app.put("/updateToy/:id", async (req, res) => {
@@ -109,7 +127,6 @@ async function run() {
 
 
         app.delete('/myToys/:id', async (req, res) => {
-            console.log(req.params.id)
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await serviceCollection.deleteOne(query);
