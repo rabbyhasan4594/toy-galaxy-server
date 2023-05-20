@@ -83,7 +83,14 @@ async function run() {
             res.send(toys);
         });
 
-        
+        app.get("/viewDetails/:id", async (req, res) => {
+            console.log(req.params.id);
+            const viewDetails = await serviceCollection.findOne({
+              _id: new ObjectId(req.params.id),
+            });
+            res.send(viewDetails);
+          });
+
         app.put("/updateToy/:id", async (req, res) => {
             const id = req.params.id;
             const body = req.body;
