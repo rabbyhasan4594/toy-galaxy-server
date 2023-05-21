@@ -6,8 +6,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 //middleware
-
-app.use(cors());
+const corsOptions ={
+    origin:'*', 
+    credentials:true,
+    optionSuccessStatus:200,
+ }
+app.use(cors(corsOptions));
 app.use(express.json());
 
 
@@ -25,10 +29,12 @@ const client = new MongoClient(uri, {
     }
 });
 
+
+
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+      await  client.connect();
 
 
 
@@ -44,9 +50,11 @@ async function run() {
             const result = await serviceCollection.insertOne(body);
             res.send(result)
         })
-        app.get("/allToys", async (req, res) => {
+        app.get("/allToysLimit", async (req, res) => {
 
-            const result = await serviceCollection.find({}).toArray();
+            const result = await serviceCollection.find({})
+            .limit(20)
+            .toArray();
             res.send(result);
         })
 
@@ -86,7 +94,7 @@ async function run() {
             res.send(toys);
         });
 
-        app.get("/myToys/sort/:email", async (req, res) => {
+        app.get("/myToysSort/:email", async (req, res) => {
             const toys = await serviceCollection
                 .find({
                     sellerEmail: req.params.email,
@@ -126,7 +134,7 @@ async function run() {
         });
 
 
-        app.delete('/myToys/:id', async (req, res) => {
+        app.delete('/myToysDelete/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await serviceCollection.deleteOne(query);
